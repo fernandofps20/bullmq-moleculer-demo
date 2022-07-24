@@ -1,7 +1,7 @@
 "use strict";
 
-const DbMixin = require("../mixins/db.mixin");
 const BullMqMixin = require("moleculer-bullmq");
+
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
  */
@@ -53,14 +53,19 @@ module.exports = {
                     email,
                     password
                 }
-                await this.queue(ctx, 'jobs', 'RegistrationMail', user);
+                await this.queue(ctx, 'jobs', 'RegistrationMail', user, {attempts: 10, delay: 5000});
                 return user;
             }
         },
         'testConsole.async': {
             rest: "GET /testConsole",
             async handler(ctx) {
-                await this.queue(ctx, 'jobs', 'TestConsole');
+                const user = {
+                    name: "NAME",
+                    email: "EMAIL",
+                    password: "password"
+                }
+                await this.queue(ctx, 'jobs', 'TestConsole', user);
                 return "OK";
             }
         }

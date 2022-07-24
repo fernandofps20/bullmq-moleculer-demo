@@ -5,8 +5,9 @@ const ApiGateway = require("moleculer-web");
 const { ExpressAdapter } = require('@bull-board/express');
 const { createBullBoard } = require('@bull-board/api');
 const { BullMQAdapter } = require('@bull-board/api/bullMQAdapter');
-const BullMqMixin = require("moleculer-bullmq");
+const BullMqMixin = require('moleculer-bullmq');
 const { Queue } = require('bullmq');
+const IORedis = require('ioredis');
 
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
@@ -184,11 +185,13 @@ module.exports = {
 	
 	created() {
 		const serverAdapter = new ExpressAdapter();
+		const connection = new IORedis();
 		createBullBoard({
-			queues: [new BullMQAdapter(new Queue('RegistrationMail')), new BullMQAdapter(new Queue('TestConsole'))],
+			queues: [new BullMQAdapter(new Queue('jobs', { connection }))],
 			serverAdapter: serverAdapter,
 		});
         const app = express();
+		//app.use(express.json());
         serverAdapter.setBasePath('/admin/queues');
         app.use('/admin/queues', serverAdapter.getRouter());
         app.use(this.express());
@@ -209,7 +212,7 @@ module.exports = {
         if (this.app.listening) {
             this.app.close(err => {
                 if (err)
-                    return this.logger.error("WWW server close error!", err);
+                    return this.logger.error("admin server close error!", err);
 
                 this.logger.info("admin server stopped!");
             });

@@ -53,19 +53,78 @@ module.exports = {
                     email,
                     password
                 }
-                await this.queue(ctx, 'jobs', 'RegistrationMail', user, {attempts: 10, delay: 5000});
+                await this.queue(ctx, 'jobs', 'RegistrationMail', user, { attempts: 10, delay: 5000 });
                 return user;
             }
         },
-        'testConsole.async': {
-            rest: "GET /testConsole",
+        'testDelay.async': {
+            rest: "GET /testDelay",
             async handler(ctx) {
                 const user = {
                     name: "NAME",
                     email: "EMAIL",
                     password: "password"
                 }
-                await this.queue(ctx, 'jobs', 'TestConsole', user);
+                await this.queue(ctx, 'jobs', 'TestConsole', user, { delay: 5000 });
+                return "OK";
+            }
+        },
+        'testRepeatable1.async': {
+            rest: "GET /testRepeatable1",
+            async handler(ctx) {
+                const user = {
+                    name: "NAME",
+                    email: "EMAIL",
+                    password: "password"
+                }
+                await this.queue(ctx, 'jobs', 'TestConsole', user, {
+                    repeat: {
+                        cron: '* 15 3 * * *',
+                    },
+                });
+                return "OK";
+            }
+        },
+        'testRepeatable2.async': {
+            rest: "GET /testRepeatable2",
+            async handler(ctx) {
+                const user = {
+                    name: "NAME",
+                    email: "EMAIL",
+                    password: "password"
+                }
+                await this.queue(ctx, 'jobs', 'TestConsole', user, {
+                    repeat: {
+                        every: 10000,
+                        limit: 100,
+                    }
+                });
+                return "OK";
+            }
+        },
+        'testPrioritized.async': {
+            rest: "GET /testPrioritized",
+            async handler(ctx) {
+                const user = {
+                    name: "NAME",
+                    email: "EMAIL",
+                    password: "password"
+                }
+                await this.queue(ctx, 'jobs', 'TestConsole', user, { priority: 10 });
+                return "OK";
+            }
+        },
+        'pauseQueue.async': {
+            rest: "POST /pauseQueue",
+            async handler(ctx) {
+                await this.pause('jobs');
+                return "OK";
+            }
+        },
+        'resumeQueue.async': {
+            rest: "POST /resumeQueue",
+            async handler(ctx) {
+                await this.resume('jobs');
                 return "OK";
             }
         }

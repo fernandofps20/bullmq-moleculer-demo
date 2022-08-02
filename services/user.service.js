@@ -65,7 +65,8 @@ module.exports = {
                     email: "EMAIL",
                     password: "password"
                 }
-                await this.queue(ctx, 'jobs', 'TestConsole', user, { delay: 5000 });
+                const job = await this.queue(ctx, 'jobs', 'TestConsole', user, { delay: 5000 });
+                console.log(job);
                 return "OK";
             }
         },
@@ -125,6 +126,16 @@ module.exports = {
             rest: "POST /resumeQueue",
             async handler(ctx) {
                 await this.resume('jobs');
+                return "OK";
+            }
+        },
+        'testRemoveJob.async': {
+            rest: "GET /testRemoveJob",
+            async handler(ctx) {
+                //return await this.$resolve("jobs").getJob(id);
+
+                //const job = await this.job('jobs', id);
+                //await job.remove();
                 return "OK";
             }
         }
